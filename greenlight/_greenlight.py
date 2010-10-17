@@ -3,7 +3,7 @@ from gevent.greenlet import Greenlet
 from gevent.event import AsyncResult
 from .utils import hide_stderr
 
-__all__ = ['greenlight', 'green_return']
+__all__ = ['greenlight', 'greenlight_nostart', 'green_return']
 
 class _Greenlight_Return(Exception):
     def __init__(self, value):
@@ -20,10 +20,11 @@ def _greenlight(result, generator, asyncresult):
         return asyncresult
     waiting = [True, None]
     while True:
+        isgreenlet = isinstance(result, Greenlet)
         try:
-            if isinstance(result, Greenlet):
+            if isgreenlet:
                 try:
-                    value = result.get()
+                    value = result.get(False)
                 except Exception, e:
                     generator.throw(result.exception)
             else:
@@ -31,7 +32,7 @@ def _greenlight(result, generator, asyncresult):
             result = generator.send(value)
         except StopIteration:
             # Return the value last yielded
-            asyncresult.set(value)
+            asyncresult.set(result.value if isgreenlet else result)
             return asyncresult
         except _Greenlight_Return, e:
             # Return the explicitly returned value
@@ -59,8 +60,7 @@ def _greenlight(result, generator, asyncresult):
             waiting[1] = None
     return asyncresult
 
-
-def greenlight(f):
+def greenlight_nostart(f):
     @wraps(f)
     def inner(*args, **kwargs):
         @wraps(f)
@@ -73,4 +73,11 @@ def greenlight(f):
         hide_stderr(g)
         return g
     return inner
-#
+
+def greenlight(f):
+    @wraps(f)
+    def inner(*args, **kwargs):
+        g = greenlight_nostart(f)(*args, **kwargs)
+        g.start()
+        return g
+    return inner
