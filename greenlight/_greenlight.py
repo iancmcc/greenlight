@@ -5,11 +5,20 @@ from .utils import hide_stderr
 
 __all__ = ['greenlight', 'greenlight_nostart', 'green_return']
 
+
 class _Greenlight_Return(Exception):
+    """
+    Special exception, so we can break out of the generator.
+    """
     def __init__(self, value):
         self.value = value
 
+
 def green_return(value):
+    """
+    Raise our special exception, signaling the generator to stop and return the
+value.
+    """
     raise _Greenlight_Return(value)
 
 
@@ -45,6 +54,7 @@ def _greenlight(result, generator, asyncresult):
         if isinstance(result, Greenlet):
             # monkey-patch the exception
             hide_stderr(result)
+
             def onresult(res):
                 if waiting[0]:
                     waiting[0] = False
@@ -60,6 +70,7 @@ def _greenlight(result, generator, asyncresult):
             waiting[1] = None
     return asyncresult
 
+
 def greenlight_nostart(f):
     @wraps(f)
     def inner(*args, **kwargs):
@@ -73,6 +84,7 @@ def greenlight_nostart(f):
         hide_stderr(g)
         return g
     return inner
+
 
 def greenlight(f):
     @wraps(f)

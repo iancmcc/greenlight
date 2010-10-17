@@ -1,6 +1,7 @@
 import sys
 from functools import wraps
 
+
 class DevNull(object):
     @staticmethod
     def write(m):
@@ -25,4 +26,3 @@ def hide_stderr(greenlet):
             sys.stderr = old_stderr
 
     greenlet._report_error = inner
-
