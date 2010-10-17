@@ -1,10 +1,7 @@
 Greenlight
 ==========
-Turn your code green!
----------------------
-
-`greenlight` is a powerful decorator that helps you write code using gevent. You
-can decorate an existing function to run it in a greenlet::
+``greenlight`` is a powerful decorator that helps you write code using gevent_.
+You can decorate an existing function to run it in a greenlet::
 
     >>> from greenlight import greenlight
     >>> from gevent.greenlet import Greenlet
@@ -19,11 +16,12 @@ can decorate an existing function to run it in a greenlet::
     >>> g.get()
     100
 
-More interestingly, you can chain greenlets inside a greenlit generator. This
-saves boilerplate; one would otherwise have to call gevent.spawn() on each
-function, then either link() them together, or, perhaps, call join() or get()
-on each one and pass the result to the next. With `greenlight`, you can simply
-yield to get results inline::
+More interestingly, you can chain greenlets inside a greenlit generator
+(similar to Twisted's inlineCallbacks_). This saves boilerplate; one would
+otherwise have to call ``gevent.spawn()`` on each function, then either
+``link()`` them together, or, perhaps, call ``join()`` or ``get()`` on each one
+and pass the result to the next. With ``greenlight``, you can simply yield to
+get results inline::
 
     >>> @greenlight
     ... def square_thrice(n):
@@ -39,8 +37,8 @@ very similar to the synchronous code you normally would, while still ensuring
 execution order, simply by chaining greenlit functions together. 
 
 You can explicitly return values from the greenlit generator using the
-green_return function. If green_return is not used, the result of the last
-greenlet yielded is returned (as in the previous example)::
+``green_return`` function. If ``green_return`` is not used, the result of the
+last greenlet yielded is returned (as in the previous example)::
 
     >>> from greenlight import green_return
     >>> @greenlight
@@ -72,8 +70,8 @@ Error handling works as you would expect::
     >>> main().get()
     O NOES
 
-`greenlight` normally behaves like gevent.spawn, in that it starts greenlets for
-you. If you don't want that to happen, you can use `greenlight_nostart`::
+``greenlight`` normally behaves like gevent.spawn_, in that it starts greenlets for
+you. If you don't want that to happen, you can use ``greenlight_nostart``::
 
     >>> from greenlight import greenlight_nostart as greenlight
     >>> @greenlight
@@ -86,3 +84,6 @@ you. If you don't want that to happen, you can use `greenlight_nostart`::
     >>> g.start(); g.get()
     16
 
+.. _inlineCallbacks: http://twistedmatrix.com/documents/8.1.0/api/twisted.internet.defer.html#inlineCallbacks
+.. _gevent: http://www.gevent.org/
+.. _gevent.spawn: http://www.gevent.org/gevent.html#spawn-helpers
